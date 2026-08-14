@@ -7,9 +7,12 @@ function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleLogin = (event) => {
     event.preventDefault();
+
+    setError("");
 
     let user = null;
 
@@ -46,28 +49,37 @@ function Login() {
       };
     }
 
-    if (user) {
-      const token = generateToken(user);
-
-      localStorage.setItem("token", token);
-
-      navigate("/dashboard");
-    } else {
-      alert("Invalid Credentials");
+    if (!user) {
+      setError("Invalid email or password.");
+      return;
     }
+
+    const token = generateToken(user);
+
+    localStorage.setItem("token", token);
+
+    navigate("/dashboard");
   };
 
   return (
     <div className="login-container">
       <div className="login-card">
 
-        <h1>RBAC Login</h1>
+        <div className="login-icon">
+          🔐
+        </div>
+
+        <h1>Secure CMS</h1>
+
+        <p className="login-subtitle">
+          JWT Authentication & RBAC
+        </p>
 
         <form onSubmit={handleLogin}>
 
           <input
             type="email"
-            placeholder="Email"
+            placeholder="Email address"
             value={email}
             onChange={(event) =>
               setEmail(event.target.value)
@@ -83,35 +95,41 @@ function Login() {
             }
           />
 
-          <button type="submit">
-            Login
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="login-btn"
+          >
+            Sign In →
           </button>
 
         </form>
 
-        <br />
+        <div className="demo-box">
 
-        <h3>Admin</h3>
+          <h3>Demo Accounts</h3>
 
-        <p>admin@gmail.com</p>
+          <div className="demo-account">
+            <strong>👑 Admin</strong>
+            <span>admin@gmail.com / admin123</span>
+          </div>
 
-        <p>admin123</p>
+          <div className="demo-account">
+            <strong>✏️ Editor</strong>
+            <span>editor@gmail.com / editor123</span>
+          </div>
 
-        <br />
+          <div className="demo-account">
+            <strong>👁️ Viewer</strong>
+            <span>viewer@gmail.com / viewer123</span>
+          </div>
 
-        <h3>Editor</h3>
-
-        <p>editor@gmail.com</p>
-
-        <p>editor123</p>
-
-        <br />
-
-        <h3>Viewer</h3>
-
-        <p>viewer@gmail.com</p>
-
-        <p>viewer123</p>
+        </div>
 
       </div>
     </div>

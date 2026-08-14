@@ -1,23 +1,35 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Unauthorized() {
+  const navigate = useNavigate();
+
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-card">
+    <div className="unauthorized-page">
+
+      <div className="unauthorized-card">
+
+        <div className="lock-icon">
+          🔒
+        </div>
+
         <h1>403</h1>
 
-        <h2>Access Denied</h2>
+        <h2>Access Restricted</h2>
 
         <p>
-          You don't have permission to access this page.
+          You are authenticated, but your current
+          role does not have permission to access
+          this resource.
         </p>
 
-        <Link to="/dashboard">
-          <button className="logout-btn">
-            Back to Dashboard
-          </button>
-        </Link>
+        <button
+          onClick={() => navigate("/dashboard")}
+        >
+          ← Back to Dashboard
+        </button>
+
       </div>
+
     </div>
   );
 }

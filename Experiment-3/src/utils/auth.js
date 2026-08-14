@@ -8,7 +8,7 @@ export function generateToken(user) {
     name: user.name,
     email: user.email,
     role: user.role,
-    loginTime: new Date().toLocaleString(),
+    iat: Date.now(),
   };
 
   return (
@@ -21,9 +21,28 @@ export function generateToken(user) {
 
 export function decodeToken(token) {
   try {
-    const payload = token.split(".")[1];
-    return JSON.parse(atob(payload));
+    const parts = token.split(".");
+
+    if (parts.length !== 3) {
+      return null;
+    }
+
+    return JSON.parse(atob(parts[1]));
   } catch {
     return null;
   }
+}
+
+export function getCurrentUser() {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    return null;
+  }
+
+  return decodeToken(token);
+}
+
+export function logout() {
+  localStorage.removeItem("token");
 }

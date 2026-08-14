@@ -1,14 +1,8 @@
 import { Navigate } from "react-router-dom";
-import { decodeToken } from "../utils/auth";
+import { getCurrentUser } from "../utils/auth";
 
 function RoleRoute({ children, allowedRoles }) {
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    return <Navigate to="/" replace />;
-  }
-
-  const user = decodeToken(token);
+  const user = getCurrentUser();
 
   if (!user) {
     return <Navigate to="/" replace />;
