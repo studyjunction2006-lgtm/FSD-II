@@ -1,81 +1,57 @@
-export function startOfDay(date) {
-  const result = new Date(date);
-  result.setHours(0, 0, 0, 0);
-  return result;
-}
+export const DAYS = [
+  {
+    date: "2026-09-07",
+    short: "MON",
+    number: 7,
+    today: false,
+  },
+  {
+    date: "2026-09-08",
+    short: "TUE",
+    number: 8,
+    today: false,
+  },
+  {
+    date: "2026-09-09",
+    short: "WED",
+    number: 9,
+    today: false,
+  },
+  {
+    date: "2026-09-10",
+    short: "THU",
+    number: 10,
+    today: true,
+  },
+  {
+    date: "2026-09-11",
+    short: "FRI",
+    number: 11,
+    today: false,
+  },
+  {
+    date: "2026-09-12",
+    short: "SAT",
+    number: 12,
+    today: false,
+  },
+  {
+    date: "2026-09-13",
+    short: "SUN",
+    number: 13,
+    today: false,
+  },
+];
 
-export function formatDateKey(date) {
-  const d = new Date(date);
-
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-}
-
-export function formatTime(date) {
-  return new Date(date).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-export function formatMonthDay(date) {
-  return new Date(date).toLocaleDateString([], {
-    month: "short",
-    day: "numeric",
-  });
-}
-
-export function formatFullDate(date) {
-  return new Date(date).toLocaleDateString([], {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-export function getMonday(date) {
-  const result = startOfDay(date);
-  const day = result.getDay();
-
-  const difference = day === 0 ? -6 : 1 - day;
-
-  result.setDate(result.getDate() + difference);
-
-  return result;
-}
-
-export function addDays(date, amount) {
-  const result = new Date(date);
-  result.setDate(result.getDate() + amount);
-  return result;
-}
-
-export function combineDateAndTime(date, time) {
-  const result = new Date(date);
-
-  const [hours, minutes] = time.split(":").map(Number);
-
-  result.setHours(hours || 0, minutes || 0, 0, 0);
-
-  return result;
-}
-
-export function getHour(date) {
-  return new Date(date).getHours();
-}
-
-export function getMinutes(date) {
-  return new Date(date).getMinutes();
-}
-
-export function getWeekDays(date) {
-  const monday = getMonday(date);
-
-  return Array.from({ length: 7 }, (_, index) => {
-    return addDays(monday, index);
-  });
-}
+export const TIME_SLOTS = [
+  "8:00 AM",
+  "9:00 AM",
+  "10:00 AM",
+  "11:00 AM",
+  "12:00 PM",
+  "1:00 PM",
+  "2:00 PM",
+  "3:00 PM",
+  "4:00 PM",
+  "5:00 PM",
+];

@@ -1,199 +1,145 @@
-import React, {
-  useState,
-} from "react";
+import { useState } from "react";
 
-export default function CreatePostModal({
+const EMPTY_POST = {
+  title: "",
+  platform: "LinkedIn",
+  date: "2026-09-07",
+  time: "8:00 AM",
+};
+
+function CreatePostModal({
+  post,
+  onSave,
+  onDelete,
   onClose,
-  onCreate,
 }) {
-  const [title, setTitle] =
-    useState("");
+  const [form, setForm] = useState(
+    post || EMPTY_POST
+  );
 
-  const [content, setContent] =
-    useState("");
+  const updateField = (field, value) => {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
 
-  const [platform, setPlatform] =
-    useState("Instagram");
-
-  const [status, setStatus] =
-    useState("Draft");
-
-  const [date, setDate] =
-    useState("");
-
-  const [time, setTime] =
-    useState("10:00");
-
-  const submit = (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
 
-    if (!title.trim()) {
+    if (!form.title.trim()) {
       return;
     }
 
-    const selectedDate = date
-      ? new Date(`${date}T${time}`)
-      : new Date();
-
-    onCreate({
-      title,
-      content,
-      platform,
-      status,
-      date: selectedDate.toISOString(),
-      duration: 60,
-      color: "cyan",
-    });
-
-    onClose();
+    onSave(form);
   };
 
   return (
-    <div className="modal-backdrop">
+    <div
+      className="modal-backdrop"
+      onMouseDown={(event) => {
+        if (
+          event.target === event.currentTarget
+        ) {
+          onClose();
+        }
+      }}
+    >
+      <div className="modal">
+        <h2>
+          {post ? "Edit Post" : "Create Post"}
+        </h2>
 
-      <div className="create-modal">
-
-        <div className="modal-header">
-
-          <div>
-            <h2>Create New Post</h2>
-
-            <p>
-              Add a post to your content calendar.
-            </p>
-          </div>
-
-          <button
-            className="modal-close"
-            onClick={onClose}
-          >
-            ×
-          </button>
-
-        </div>
-
-        <form onSubmit={submit}>
-
-          <label>
-            Post Title
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Post Title</label>
 
             <input
-              value={title}
+              value={form.title}
               onChange={(event) =>
-                setTitle(
+                updateField(
+                  "title",
                   event.target.value
                 )
               }
               placeholder="Enter post title"
             />
-          </label>
+          </div>
 
-          <label>
-            Content
+          <div className="form-group">
+            <label>Platform</label>
 
-            <textarea
-              value={content}
+            <select
+              value={form.platform}
               onChange={(event) =>
-                setContent(
+                updateField(
+                  "platform",
                   event.target.value
                 )
               }
-              placeholder="Write your content..."
-              rows="4"
-            />
-          </label>
-
-          <div className="form-row">
-
-            <label>
-              Platform
-
-              <select
-                value={platform}
-                onChange={(event) =>
-                  setPlatform(
-                    event.target.value
-                  )
-                }
-              >
-                <option>
-                  Instagram
-                </option>
-
-                <option>
-                  LinkedIn
-                </option>
-
-                <option>
-                  Facebook
-                </option>
-              </select>
-            </label>
-
-            <label>
-              Status
-
-              <select
-                value={status}
-                onChange={(event) =>
-                  setStatus(
-                    event.target.value
-                  )
-                }
-              >
-                <option>
-                  Draft
-                </option>
-
-                <option>
-                  Scheduled
-                </option>
-
-                <option>
-                  Published
-                </option>
-              </select>
-            </label>
-
+            >
+              <option>LinkedIn</option>
+              <option>Instagram</option>
+              <option>Twitter</option>
+            </select>
           </div>
 
-          <div className="form-row">
+          <div className="form-group">
+            <label>Date</label>
 
-            <label>
-              Date
+            <input
+              type="date"
+              value={form.date}
+              onChange={(event) =>
+                updateField(
+                  "date",
+                  event.target.value
+                )
+              }
+            />
+          </div>
 
-              <input
-                type="date"
-                value={date}
-                onChange={(event) =>
-                  setDate(
-                    event.target.value
-                  )
-                }
-              />
-            </label>
+          <div className="form-group">
+            <label>Time</label>
 
-            <label>
-              Time
-
-              <input
-                type="time"
-                value={time}
-                onChange={(event) =>
-                  setTime(
-                    event.target.value
-                  )
-                }
-              />
-            </label>
-
+            <select
+              value={form.time}
+              onChange={(event) =>
+                updateField(
+                  "time",
+                  event.target.value
+                )
+              }
+            >
+              <option>8:00 AM</option>
+              <option>9:00 AM</option>
+              <option>10:00 AM</option>
+              <option>11:00 AM</option>
+              <option>12:00 PM</option>
+              <option>1:00 PM</option>
+              <option>2:00 PM</option>
+              <option>3:00 PM</option>
+              <option>4:00 PM</option>
+              <option>5:00 PM</option>
+            </select>
           </div>
 
           <div className="modal-actions">
+            {post && (
+              <button
+                type="button"
+                className="danger-button"
+                onClick={() =>
+                  onDelete(post.id)
+                }
+              >
+                Delete
+              </button>
+            )}
 
             <button
               type="button"
-              className="cancel-button"
+              className="secondary-button"
               onClick={onClose}
             >
               Cancel
@@ -201,17 +147,15 @@ export default function CreatePostModal({
 
             <button
               type="submit"
-              className="create-button"
+              className="save-button"
             >
-              Create Post
+              {post ? "Save Changes" : "Create Post"}
             </button>
-
           </div>
-
         </form>
-
       </div>
-
     </div>
   );
 }
+
+export default CreatePostModal;

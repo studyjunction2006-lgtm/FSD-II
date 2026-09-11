@@ -1,64 +1,107 @@
-import React from "react";
 import {
-  formatTime,
-} from "../../utils/dateUtils";
+  memo,
+  useCallback,
+} from "react";
+
+import {
+  recordPostCardRender,
+} from "../../performanceStore";
 
 function PostCard({
   post,
   onEdit,
-  onDelete,
-  onDragStart,
+  useCallbackOptimization,
+  onInteractionStart,
 }) {
-  return (
-    <div
-      className={`post-card post-${post.color}`}
-      draggable
-      onDragStart={(event) => {
+  recordPostCardRender();
+
+  const memoizedEdit = useCallback(() => {
+    onEdit(post);
+  }, [onEdit, post]);
+
+  const normalEdit = () => {
+    onEdit(post);
+  };
+
+  const handleEdit =
+    useCallbackOptimization
+      ? memoizedEdit
+      : normalEdit;
+
+  const memoizedDragStart =
+    useCallback(
+      (event) => {
         event.dataTransfer.setData(
           "postId",
-          String(post.id)
+          post.id
         );
 
-        onDragStart?.(post);
-      }}
-      onClick={() => onEdit(post)}
-    >
-      <div className="post-card-top">
-        <span className="platform">
-          {post.platform}
-        </span>
+        event.dataTransfer.effectAllowed =
+          "move";
 
-        <span
-          className={`status status-${post.status.toLowerCase()}`}
-        >
-          {post.status}
+        onInteractionStart?.(event);
+      },
+      [
+        post.id,
+        onInteractionStart,
+      ]
+    );
+
+  const normalDragStart = (event) => {
+    event.dataTransfer.setData(
+      "postId",
+      post.id
+    );
+
+    event.dataTransfer.effectAllowed =
+      "move";
+
+    onInteractionStart?.(event);
+  };
+
+  const handleDragStart =
+    useCallbackOptimization
+      ? memoizedDragStart
+      : normalDragStart;
+
+  return (
+    <div
+      className="post-card"
+      draggable="true"
+      onClick={handleEdit}
+      onDragStart={handleDragStart}
+      data-testid={`post-${post.id}`}
+    >
+      <div className="card-top">
+        <div className="platform">
+          {post.platform === "LinkedIn"
+            ? "in"
+            : post.platform === "Instagram"
+              ? "◎"
+              : "𝕏"}
+        </div>
+
+        <span className="status-badge">
+          Scheduled
         </span>
       </div>
 
-      <h4>{post.title}</h4>
+      <div className="post-title">
+        {post.title}
+      </div>
 
-      <p>{post.content}</p>
+      <div className="post-info">
+        {post.platform} • {post.time}
+      </div>
 
-      <div className="post-card-bottom">
-        <span>
-          ◷ {formatTime(post.date)}
-        </span>
-
-        <button
-          className="delete-button"
-          onClick={(event) => {
-            event.stopPropagation();
-            onDelete(post.id);
-          }}
-        >
-          ×
-        </button>
+      <div className="drag-text">
+        ↕ Drag to reschedule
       </div>
     </div>
   );
 }
 
-export const MemoizedPostCard =
-  React.memo(PostCard);
+export const MemoPostCard =
+  memo(PostCard);
 
 export default PostCard;

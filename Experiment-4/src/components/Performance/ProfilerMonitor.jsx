@@ -1,88 +1,25 @@
-import React, {
-  Profiler,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { Profiler } from "react";
+import {
+  recordProfilerRender,
+} from "../../performanceStore";
 
-export default function ProfilerMonitor({
-  children,
-  onStats,
-}) {
-  const profilerRef = useRef({
-    commits: 0,
-    actualDuration: 0,
-    baseDuration: 0,
-    phase: "—",
-    component: "—",
-  });
-
-  const [, setTick] =
-    useState(0);
-
-  /*
-   * React Profiler callback.
-   *
-   * IMPORTANT:
-   * We store the data in a ref.
-   * We do NOT call setState directly
-   * inside onRender.
-   *
-   * This prevents:
-   *
-   * render → profiler → setState
-   * → render → profiler → setState
-   *
-   * infinite loops.
-   */
-
-  const handleRender = (
+function ProfilerMonitor({ children }) {
+  const handleProfiler = (
     id,
     phase,
-    actualDuration,
-    baseDuration
+    actualDuration
   ) => {
-    profilerRef.current = {
-      commits:
-        profilerRef.current.commits + 1,
-
-      actualDuration,
-
-      baseDuration,
-
-      phase,
-
-      component: id,
-    };
+    recordProfilerRender(actualDuration);
   };
-
-  /*
-   * Poll profiler information every 500ms.
-   *
-   * The update happens outside the Profiler
-   * callback.
-   */
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTick((value) => value + 1);
-
-      if (onStats) {
-        onStats({
-          ...profilerRef.current,
-        });
-      }
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, [onStats]);
 
   return (
     <Profiler
       id="PostFlowCalendar"
-      onRender={handleRender}
+      onRender={handleProfiler}
     >
       {children}
     </Profiler>
   );
 }
+
+export default ProfilerMonitor;

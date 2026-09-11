@@ -1,311 +1,249 @@
-import React, {
-  useMemo,
-} from "react";
+import { useState } from "react";
 
-export default function PerformancePanel({
+function PerformancePanel({
   optimized,
-  memoCards,
-  callbackHandlers,
-  memoAgenda,
-  memoClock,
-  profilerData,
+  setOptimized,
+  useReactMemo,
+  setUseReactMemo,
+  useCallbackOptimization,
+  setUseCallbackOptimization,
+  useMemoOptimization,
+  setUseMemoOptimization,
 }) {
-  const safeProfiler =
-    profilerData &&
-    typeof profilerData === "object"
-      ? profilerData
-      : {};
+  const [metrics, setMetrics] = useState({
+    calendar: 0,
+    cards: 0,
+    dragTime: 0,
+  });
 
-  const efficiencyScore =
-    useMemo(() => {
-      let score = 50;
+  const [comparison, setComparison] = useState({
+    baseline: null,
+    optimized: null,
+  });
 
-      if (optimized) {
-        score += 15;
-      }
+  const resetMetrics = () => {
+    setMetrics({
+      calendar: 0,
+      cards: 0,
+      dragTime: 0,
+    });
 
-      if (memoCards) {
-        score += 10;
-      }
+    setComparison({
+      baseline: null,
+      optimized: null,
+    });
+  };
 
-      if (callbackHandlers) {
-        score += 10;
-      }
-
-      if (memoAgenda) {
-        score += 7;
-      }
-
-      if (memoClock) {
-        score += 8;
-      }
-
-      return Math.min(score, 100);
-    }, [
-      optimized,
-      memoCards,
-      callbackHandlers,
-      memoAgenda,
-      memoClock,
-    ]);
-
-  const actualDuration =
-    Number(
-      safeProfiler.actualDuration
-    ) || 0;
-
-  const baseDuration =
-    Number(
-      safeProfiler.baseDuration
-    ) || 0;
+  const modeLabel = optimized
+    ? "OPTIMIZED"
+    : "BASELINE";
 
   return (
     <aside className="performance-panel">
-
       <div className="performance-header">
-
         <div>
-          <span className="panel-label">
-            PERFORMANCE
-          </span>
+          <div className="experiment-label">
+            EXPERIMENT 1.4.2
+          </div>
 
-          <h2>
-            Render Monitor
-          </h2>
+          <h2>Performance Lab</h2>
         </div>
 
-        <div
-          className={`performance-status ${
-            optimized
-              ? "good"
-              : "warning"
+        <span
+          className={`mode-badge ${
+            optimized ? "optimized" : "baseline"
           }`}
         >
-          {optimized
-            ? "OPTIMIZED"
-            : "RAW"}
-        </div>
-
+          {modeLabel}
+        </span>
       </div>
 
-      {/* SCORE */}
+      <p className="performance-description">
+        Compare React rendering behaviour by enabling
+        optimization techniques one-by-one.
+      </p>
 
-      <div className="score-card">
+      <div className="mode-switch">
+        <button
+          className={!optimized ? "active" : ""}
+          onClick={() => setOptimized(false)}
+        >
+          Non-Optimized
+        </button>
 
-        <div className="score-ring">
-          <strong>
-            {efficiencyScore}
-          </strong>
-
-          <span>
-            /100
-          </span>
-        </div>
-
-        <div>
-          <h3>
-            Performance Score
-          </h3>
-
-          <p>
-            Based on enabled React
-            optimizations.
-          </p>
-        </div>
-
+        <button
+          className={optimized ? "active" : ""}
+          onClick={() => setOptimized(true)}
+        >
+          Optimized
+        </button>
       </div>
 
-      {/* PROFILER */}
-
-      <div className="performance-section">
-
-        <div className="section-heading">
-          React Profiler
-        </div>
-
-        <div className="metric-row">
-          <span>
-            Commit count
-          </span>
-
-          <strong>
-            {safeProfiler.commits || 0}
-          </strong>
-        </div>
-
-        <div className="metric-row">
-          <span>
-            Actual duration
-          </span>
-
-          <strong>
-            {actualDuration.toFixed(2)} ms
-          </strong>
-        </div>
-
-        <div className="metric-row">
-          <span>
-            Base duration
-          </span>
-
-          <strong>
-            {baseDuration.toFixed(2)} ms
-          </strong>
-        </div>
-
-        <div className="metric-row">
-          <span>
-            Last phase
-          </span>
-
-          <strong>
-            {safeProfiler.phase || "—"}
-          </strong>
-        </div>
-
-      </div>
-
-      {/* OPTIMIZATION CONTROLS */}
-
-      <div className="performance-section">
-
-        <div className="section-heading">
-          Optimization status
-        </div>
-
-        <OptimizationRow
-          label="React.memo"
-          enabled={
-            optimized && memoCards
-          }
-        />
-
-        <OptimizationRow
-          label="useCallback"
-          enabled={
-            optimized &&
-            callbackHandlers
-          }
-        />
-
-        <OptimizationRow
-          label="Agenda useMemo"
-          enabled={
-            optimized &&
-            memoAgenda
-          }
-        />
-
-        <OptimizationRow
-          label="Clock useMemo"
-          enabled={
-            optimized &&
-            memoClock
-          }
-        />
-
-      </div>
-
-      {/* RENDER ANALYSIS */}
-
-      <div className="performance-section">
-
-        <div className="section-heading">
-          Render Analysis
-        </div>
-
-        <div className="analysis-box">
-
-          <div className="analysis-icon">
-            {optimized
-              ? "⚡"
-              : "!"
-            }
-          </div>
-
+      <div className="optimization-options">
+        <label
+          className={`optimization-option ${
+            !optimized ? "disabled" : ""
+          }`}
+        >
           <div>
+            <span className="optimization-name">
+              React.memo
+            </span>
 
-            <strong>
-              {optimized
-                ? "Optimized rendering active"
-                : "Optimization disabled"}
-            </strong>
-
-            <p>
-              {optimized
-                ? "Memoized components and stable handlers reduce unnecessary work."
-                : "Components may re-render more frequently because optimization is disabled."}
-            </p>
-
+            <span className="optimization-description">
+              Skip unchanged PostCards
+            </span>
           </div>
 
-        </div>
+          <input
+            type="checkbox"
+            checked={useReactMemo}
+            disabled={!optimized}
+            onChange={(event) =>
+              setUseReactMemo(event.target.checked)
+            }
+          />
+        </label>
 
+        <label
+          className={`optimization-option ${
+            !optimized ? "disabled" : ""
+          }`}
+        >
+          <div>
+            <span className="optimization-name">
+              useCallback
+            </span>
+
+            <span className="optimization-description">
+              Stabilize event handlers
+            </span>
+          </div>
+
+          <input
+            type="checkbox"
+            checked={useCallbackOptimization}
+            disabled={!optimized}
+            onChange={(event) =>
+              setUseCallbackOptimization(
+                event.target.checked
+              )
+            }
+          />
+        </label>
+
+        <label
+          className={`optimization-option ${
+            !optimized ? "disabled" : ""
+          }`}
+        >
+          <div>
+            <span className="optimization-name">
+              useMemo
+            </span>
+
+            <span className="optimization-description">
+              Memoize derived calculations
+            </span>
+          </div>
+
+          <input
+            type="checkbox"
+            checked={useMemoOptimization}
+            disabled={!optimized}
+            onChange={(event) =>
+              setUseMemoOptimization(
+                event.target.checked
+              )
+            }
+          />
+        </label>
       </div>
 
-      {/* EXPERIMENT INFO */}
+      <div className="metrics-heading">
+        <strong>Interaction Metrics</strong>
 
-      <div className="experiment-info">
-
-        <div>
-          <span>
-            EXPERIMENT
-          </span>
-
-          <strong>
-            1.4.1 + 1.4.2
-          </strong>
-        </div>
-
-        <div>
-          <span>
-            TECHNIQUE
-          </span>
-
-          <strong>
-            React Profiler
-          </strong>
-        </div>
-
-        <div>
-          <span>
-            INTERACTION
-          </span>
-
-          <strong>
-            Drag & Drop
-          </strong>
-        </div>
-
+        <button
+          className="reset-button"
+          onClick={resetMetrics}
+        >
+          Reset
+        </button>
       </div>
 
+      <div className="metrics-grid">
+        <div className="metric-box">
+          <span className="metric-label">
+            Calendar renders
+          </span>
+
+          <strong className="metric-value">
+            {metrics.calendar}
+          </strong>
+        </div>
+
+        <div className="metric-box">
+          <span className="metric-label">
+            PostCard renders
+          </span>
+
+          <strong className="metric-value">
+            {metrics.cards}
+          </strong>
+        </div>
+
+        <div className="metric-box full">
+          <span className="metric-label">
+            Last drag time
+          </span>
+
+          <strong className="metric-value">
+            {metrics.dragTime.toFixed(2)} ms
+          </strong>
+        </div>
+      </div>
+
+      <div className="comparison">
+        <h3>Render Comparison</h3>
+
+        <div className="comparison-row">
+          <span>Non-optimized drag</span>
+          <strong>
+            {comparison.baseline ?? "—"}
+          </strong>
+        </div>
+
+        <div className="comparison-row">
+          <span>Fully optimized drag</span>
+          <strong>
+            {comparison.optimized ?? "—"}
+          </strong>
+        </div>
+      </div>
+
+      <div className="expected-result">
+        <div className="expected-title">
+          Expected Result
+        </div>
+
+        <p>
+          Non-optimized → <strong>7</strong>
+        </p>
+
+        <p>
+          React.memo → <strong>7</strong>
+        </p>
+
+        <p>
+          memo + useCallback → <strong>1</strong>
+        </p>
+
+        <p>
+          All optimizations → <strong>1</strong>
+        </p>
+      </div>
     </aside>
   );
 }
 
-function OptimizationRow({
-  label,
-  enabled,
-}) {
-  return (
-    <div className="optimization-row">
-
-      <span>
-        {label}
-      </span>
-
-      <span
-        className={`optimization-badge ${
-          enabled
-            ? "enabled"
-            : "disabled"
-        }`}
-      >
-        {enabled
-          ? "ON"
-          : "OFF"}
-      </span>
-
-    </div>
-  );
-}
+export default PerformancePanel;

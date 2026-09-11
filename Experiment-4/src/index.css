@@ -20,14 +20,21 @@ body {
     "Segoe UI",
     sans-serif;
 
-  background: #f4f7fb;
-  color: #182033;
+  background:
+    radial-gradient(
+      circle at top left,
+      #eef2ff 0,
+      transparent 35%
+    ),
+    #f6f7fb;
+
+  color: #172033;
 }
 
 button,
 input,
-textarea,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -35,16 +42,6 @@ button {
   cursor: pointer;
 }
 
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #edf1f7;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #c8d0dd;
-  border-radius: 20px;
+button:disabled {
+  cursor: not-allowed;
 }

@@ -1,11 +1,7 @@
-import React, {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useEffect, useMemo, useState } from "react";
 
-export default function LiveClock({ useMemoClock = true }) {
-  const [now, setNow] = useState(new Date());
+function LiveClock({ useMemoOptimization }) {
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -15,43 +11,36 @@ export default function LiveClock({ useMemoClock = true }) {
     return () => clearInterval(timer);
   }, []);
 
-  const formattedTime = useMemo(() => {
-    if (!useMemoClock) {
-      return now.toLocaleTimeString();
-    }
-
-    return now.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-  }, [now, useMemoClock]);
-
-  const formattedDate = useMemo(() => {
-    if (!useMemoClock) {
-      return now.toLocaleDateString();
-    }
-
-    return now.toLocaleDateString([], {
-      weekday: "short",
+  const memoizedClock = useMemo(() => {
+    return new Intl.DateTimeFormat("en-US", {
+      weekday: "long",
       month: "short",
       day: "numeric",
-    });
-  }, [now, useMemoClock]);
+      hour: "numeric",
+      minute: "2-digit",
+      second: "2-digit",
+    }).format(now);
+  }, [now]);
+
+  const directClock = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(now);
+
+  const displayClock = useMemoOptimization
+    ? memoizedClock
+    : directClock;
 
   return (
     <div className="live-clock">
-      <div className="clock-icon">◷</div>
-
-      <div>
-        <div className="clock-time">
-          {formattedTime}
-        </div>
-
-        <div className="clock-date">
-          {formattedDate}
-        </div>
-      </div>
+      <span className="clock-dot" />
+      <span>{displayClock}</span>
     </div>
   );
 }
+
+export default LiveClock;

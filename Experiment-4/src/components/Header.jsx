@@ -1,57 +1,23 @@
-import React, {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-
-export default function LiveClock({ useMemoClock = true }) {
-  const [now, setNow] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  const formattedTime = useMemo(() => {
-    if (!useMemoClock) {
-      return now.toLocaleTimeString();
-    }
-
-    return now.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-  }, [now, useMemoClock]);
-
-  const formattedDate = useMemo(() => {
-    if (!useMemoClock) {
-      return now.toLocaleDateString();
-    }
-
-    return now.toLocaleDateString([], {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    });
-  }, [now, useMemoClock]);
-
+function Header({ children }) {
   return (
-    <div className="live-clock">
-      <div className="clock-icon">◷</div>
+    <header className="app-header">
+      <div className="brand">
+        <div className="brand-logo">P</div>
 
-      <div>
-        <div className="clock-time">
-          {formattedTime}
-        </div>
+        <div>
+          <h1 className="brand-title">
+            PostFlow
+          </h1>
 
-        <div className="clock-date">
-          {formattedDate}
+          <span className="brand-subtitle">
+            Scheduling & Performance Lab
+          </span>
         </div>
       </div>
-    </div>
+
+      {children}
+    </header>
   );
 }
+
+export default Header;

@@ -1,43 +1,105 @@
-import React from "react";
+import { useCallback } from "react";
+import PostCard, { MemoPostCard } from "./PostCard";
 
-export default function TimeSlot({
-  date,
-  hour,
-  posts,
-  onDrop,
+function TimeSlot({
+  dayIndex,
+  time,
+  posts = [],
+  useReactMemo = false,
+  useCallbackOptimization = false,
   onEdit,
-  onDelete,
-  CardComponent,
+  onDrop,
+  onInteractionStart,
 }) {
-  const slotDate = new Date(date);
+  const safePosts = Array.isArray(posts) ? posts : [];
 
-  slotDate.setHours(hour, 0, 0, 0);
+  const memoizedDrop = useCallback(
+    (event) => {
+      event.preventDefault();
+
+      event.currentTarget.classList.remove(
+        "drag-over"
+      );
+
+      const postId =
+        event.dataTransfer.getData("postId");
+
+      if (postId && onDrop) {
+        onDrop(
+          postId,
+          dayIndex,
+          time
+        );
+      }
+    },
+    [onDrop, dayIndex, time]
+  );
+
+  const normalDrop = (event) => {
+    event.preventDefault();
+
+    event.currentTarget.classList.remove(
+      "drag-over"
+    );
+
+    const postId =
+      event.dataTransfer.getData("postId");
+
+    if (postId && onDrop) {
+      onDrop(
+        postId,
+        dayIndex,
+        time
+      );
+    }
+  };
+
+  const handleDrop =
+    useCallbackOptimization
+      ? memoizedDrop
+      : normalDrop;
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+
+    event.currentTarget.classList.add(
+      "drag-over"
+    );
+  };
+
+  const handleDragLeave = (event) => {
+    event.currentTarget.classList.remove(
+      "drag-over"
+    );
+  };
+
+  const Card = useReactMemo
+    ? MemoPostCard
+    : PostCard;
 
   return (
     <div
       className="time-slot"
-      onDragOver={(event) => {
-        event.preventDefault();
-      }}
-      onDrop={(event) => {
-        event.preventDefault();
-
-        const postId =
-          event.dataTransfer.getData("postId");
-
-        if (postId) {
-          onDrop(Number(postId), slotDate);
-        }
-      }}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      data-testid={`slot-${dayIndex}-${time}`}
     >
-      {posts.map((post) => (
-        <CardComponent
+      {safePosts.map((post) => (
+        <Card
           key={post.id}
           post={post}
           onEdit={onEdit}
-          onDelete={onDelete}
+          useCallbackOptimization={
+            useCallbackOptimization
+          }
+          onInteractionStart={
+            onInteractionStart
+          }
         />
       ))}
     </div>
   );
 }
+
+export default TimeSlot;
